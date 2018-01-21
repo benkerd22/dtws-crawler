@@ -28,17 +28,16 @@ def show_items(items):
             print('  {:20}'.format(''), end='')
         print('  {0: <13}  {1}'.format(x['name'], x['type']))
 
-def main():
+def show(src, output):
     items = {}
-    with open('data.txt', 'r') as f:
+    with open(src, 'r') as f:
         items = json.load(f)
     
     s = sorted(items.items(), key=lambda x:x[1]['score']/x[1]['price'], reverse=True)
-    with open('result.txt', 'w') as f:
+    with open(output, 'w') as f:
         t = sys.stdout
         sys.stdout = f
         show_items(s)
         sys.stdout = t
-
-if __name__ == '__main__':
-    main()
+    
+    print('Show success')

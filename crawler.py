@@ -13,13 +13,14 @@ def get_url(url, **kw):
         data = requests.get(qurl + url, **kw).json()
         succ = data['status']
 
+    time.sleep(0.3)
     return data
 
 def page_crawler():
     lastpage = False
-    #i = 1
+    page = 1
     while not lastpage:
-        data = get_url('/query.py', params={'kindid':2, 'page':i})
+        data = get_url('/query.py', params={'kindid':2, 'page':page})
 
         for x in data['equip_list']:
             t = {}
@@ -30,13 +31,16 @@ def page_crawler():
             yield t
 
         lastpage = data['is_last_page']
-        #print('finish page ', i)
-        #i += 1
+        print('Finish Page:', page)
+        page += 1
 
 def role_crawler(sn, serverid):
     data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
 
     data = data['equip']
+    if data['appointed_roleid'] != '':
+        return None
+
     detail = json.loads(data['equip_desc'])
     base = detail['BaseInfo']
     pets = detail['PetInfo']
@@ -88,8 +92,8 @@ def role_crawler(sn, serverid):
         
     return item
 
-def crawler():
-    with open('data.txt', 'r') as f:
+def work(src, only_lastest=True):
+    with open(src, 'r') as f:
         data = json.load(f)
     
     i = 0
@@ -102,24 +106,27 @@ def crawler():
                 except:
                     data[sn]['minprice'] = x['price']
                 data[sn]['price'] = x['price']
-                print('Cha ', i, ' ', data[sn]['name'], sep=' ')
+                print('Change:', i, data[sn]['name'], sep=' ')
                 i += 1
                 continue
             
             if x['score'] == data[sn]['score']:
-                break
+                if only_lastest:
+                    print('Stopped at:', i)
+                    break
+                i += 1
+                continue
         
         item = role_crawler(sn, x['serverid'])
-        data[sn] = item
+        if item:
+            data[sn] = item
+            print('New:', i, item['name'], '￥', item['price'], item['score'], sep=' ')
+        else:
+            print('Bad at ', x['price'], ' ', x['score'])
+
         i += 1
-        print('New ', i, ' ', item['name'], ' ￥', item['price'], ' ', item['score'])
-        time.sleep(0.3)
 
-    with open('data.txt', 'w') as f:
+    print('Crawler success')
+    with open(src, 'w') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-
-def main():
-    crawler()
-    
-if __name__ == '__main__':
-    main()
+    print('Refresh success')
