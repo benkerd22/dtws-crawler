@@ -16,7 +16,6 @@ def get_url(url, **kw):
     return data
 
 def page_crawler():
-    brief = []
     lastpage = False
     i = 1
     while not lastpage:
@@ -28,14 +27,11 @@ def page_crawler():
             t['serverid'] = x['equip_serverid']
             t['price'] = int(re.match(r'￥(\d+)', x['price_desc']).group(1))
             t['score'] = int(re.match(r'性别:.  装备评分:(\d+)', x['subtitle']).group(1))
-            brief.append(t)
+            yield t
 
         lastpage = data['is_last_page']
-        print(i)
+        print('finish page ', i)
         i += 1
-        time.sleep(0.3)
-    
-    return brief
 
 def role_crawler(sn, serverid):
     data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
@@ -96,24 +92,27 @@ def crawler():
     with open('data.txt', 'r') as f:
         data = json.load(f)
     
-    brief = page_crawler()
     i = 0
-    for x in brief:
+    for x in page_crawler():
         sn = x['sn']
         if sn in data:
             if x['price'] != data[sn]['price']:
-                data[sn]['minprice'] = min(x['price'], data[sn]['minprice'])
+                try:
+                    data[sn]['minprice'] = min(x['price'], data[sn]['minprice'])
+                except:
+                    data[sn]['minprice'] = x['price']
                 data[sn]['price'] = x['price']
-                print(i, data[sn]['name'], sep=' ')
-            
-            if x['score'] == data[sn]['score']:
+                print('Cha ', i, ' ', data[sn]['name'], sep=' ')
                 i += 1
                 continue
+            
+            if x['score'] == data[sn]['score']:
+                break
         
         item = role_crawler(sn, x['serverid'])
         data[sn] = item
         i += 1
-        print(i, ' ', item['name'], ' ￥', item['price'], ' ', item['score'])
+        print('New ', i, ' ', item['name'], ' ￥', item['price'], ' ', item['score'])
         time.sleep(0.3)
 
     with open('data.txt', 'w') as f:
