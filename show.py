@@ -12,9 +12,9 @@ def show_items(items):
         n[0] = x['pets_legend_count']
         for pet in x['pets']:
             if pet['type'] == '钻石卡':
-                if re.match(r'\d+/1510', pet['progress']):
+                if re.match(r'\d+/10440', pet['progress']):
                     n[1] += 1
-                elif re.match(r'\d+/10440', pet['progress']):
+                elif re.match(r'\d+/1510', pet['progress']):
                     n[2] += 1
         n = list(map(lambda x:' ' if x == 0 else x, n))
 
