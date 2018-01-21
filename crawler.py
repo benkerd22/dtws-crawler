@@ -106,7 +106,7 @@ def work(src, only_lastest=True):
                 except:
                     data[sn]['minprice'] = x['price']
                 data[sn]['price'] = x['price']
-                print('Change:', i, data[sn]['name'], sep=' ')
+                print('Change:', i, data[sn]['name'], '￥', data[sn]['price'], data[sn]['score'], sep=' ')
                 i += 1
                 continue
             

@@ -3,13 +3,22 @@ import re
 import sys
 
 def show_items(items):
-    string = '￥{0: <6}  {1: >5}  {2}  {3: >3}'
+    string = '￥{0: <5}  {1: >5}  {2[0]} {2[1]} {2[2]}  {3: >3}'
     for y, x in items:
         if x['score'] < 30000:
             continue
 
-        n = x['pets_legend_count']
-        s = string.format(x['price'], x['score'], ' ' if n == 0 else n, x['collect'])
+        n = [0, 0, 0]
+        n[0] = x['pets_legend_count']
+        for pet in x['pets']:
+            if pet['type'] == '钻石卡':
+                if re.match(r'\d+/1510', pet['progress']):
+                    n[1] += 1
+                elif re.match(r'\d+/10440', pet['progress']):
+                    n[2] += 1
+        n = list(map(lambda x:' ' if x == 0 else x, n))
+
+        s = string.format(x['price'], x['score'], n, x['collect'])
         print(s, end='')
         
         equip = x['equip_info']

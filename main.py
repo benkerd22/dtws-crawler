@@ -8,7 +8,7 @@ def main():
         with open(src, 'w') as f:
             f.write('{}')
     
-    crawler.work(src, only_lastest=False)
+    crawler.work(src, only_lastest=True)
     show.show(src, 'result.txt')
 
 if __name__ == '__main__':
