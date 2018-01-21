@@ -1,19 +1,44 @@
 import json
+import re
+import sys
 
 def show_items(items):
-    for x in items:
-        if x['score'] < 40000:
+    string = '￥{0: <6}  {1: >5}  {2}  {3: >3}'
+    for y, x in items:
+        if x['score'] < 30000:
             continue
-        print('￥', int(x['price']), '  \t', x['score'], '\t', ' ' if x['pets_legend_count'] == 0 else x['pets_legend_count'],
-         '\t', x['collect'], '\t', x['name'], '\t', x['type'])
+
+        n = x['pets_legend_count']
+        s = string.format(x['price'], x['score'], ' ' if n == 0 else n, x['collect'])
+        print(s, end='')
+        
+        equip = x['equip_info']
+        for i in set([0, 16]) | set(range(4, 13)):
+            try:
+                s = re.match(r'.+?\((.+?)\)', equip[i]).group(1)
+                if s in ['+' + str(x) for x in range(11, 17)]:
+                    s = ' '
+            except:
+                s = ' '
+            print('   {0: <3}'.format(s), end='')
+
+        try:
+            print('  {0: <20}'.format(equip[15]), end='')
+        except:
+            print('  {:20}'.format(''), end='')
+        print('  {0: <13}  {1}'.format(x['name'], x['type']))
 
 def main():
     items = {}
     with open('data.txt', 'r') as f:
         items = json.load(f)
-    items.sort(key=lambda x:x['score']/x['price'])
-    #items.sort(key=lambda x:x['collect'])
-    show_items(items)
+    
+    s = sorted(items.items(), key=lambda x:x[1]['score']/x[1]['price'], reverse=True)
+    with open('result.txt', 'w') as f:
+        t = sys.stdout
+        sys.stdout = f
+        show_items(s)
+        sys.stdout = t
 
 if __name__ == '__main__':
     main()

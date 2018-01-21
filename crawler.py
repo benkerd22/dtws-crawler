@@ -26,14 +26,14 @@ def page_crawler():
             t = {}
             t['sn'] = x['game_ordersn']
             t['serverid'] = x['equip_serverid']
-            t['price'] = re.match(r'￥(\d+)', x['price_desc']).group(1)
-            t['score'] = re.match(r'性别:.  装备评分:(\d+)', x['subtitle']).group(1)
+            t['price'] = int(re.match(r'￥(\d+)', x['price_desc']).group(1))
+            t['score'] = int(re.match(r'性别:.  装备评分:(\d+)', x['subtitle']).group(1))
             brief.append(t)
 
         lastpage = data['is_last_page']
         print(i)
         i += 1
-        time.sleep(0.4)
+        time.sleep(0.3)
     
     return brief
 
@@ -52,6 +52,7 @@ def role_crawler(sn, serverid):
     
     item['name'] = data['equip_name']
     item['price'] = data['price'] // 100
+    item['minprice'] = item['price']
     item['allow_bargain'] = data['allow_bargain']
     item['area'] = data['area_name']
     item['server'] = data['server_name']
@@ -100,7 +101,13 @@ def crawler():
     for x in brief:
         sn = x['sn']
         if sn in data:
-            if x['price'] == data[sn]['price'] and x['score'] == data[sn]['score']:
+            if x['price'] != data[sn]['price']:
+                data[sn]['minprice'] = min(x['price'], data[sn]['minprice'])
+                data[sn]['price'] = x['price']
+                print(i, data[sn]['name'], sep=' ')
+            
+            if x['score'] == data[sn]['score']:
+                i += 1
                 continue
         
         item = role_crawler(sn, x['serverid'])
@@ -110,7 +117,7 @@ def crawler():
         time.sleep(0.3)
 
     with open('data.txt', 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 def main():
     crawler()
