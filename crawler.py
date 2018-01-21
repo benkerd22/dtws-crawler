@@ -17,7 +17,7 @@ def get_url(url, **kw):
 
 def page_crawler():
     lastpage = False
-    i = 1
+    #i = 1
     while not lastpage:
         data = get_url('/query.py', params={'kindid':2, 'page':i})
 
@@ -30,8 +30,8 @@ def page_crawler():
             yield t
 
         lastpage = data['is_last_page']
-        print('finish page ', i)
-        i += 1
+        #print('finish page ', i)
+        #i += 1
 
 def role_crawler(sn, serverid):
     data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
