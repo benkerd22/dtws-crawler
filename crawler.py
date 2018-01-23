@@ -13,12 +13,16 @@ def get_url(url, **kw):
         data = requests.get(qurl + url, **kw).json()
         succ = data['status']
 
-    time.sleep(0.3)
+    time.sleep(0.4)
     return data
+
+def get_time():
+    return time.strftime('%Y-%m-%d %H', time.localtime())
 
 def page_crawler():
     lastpage = False
     page = 1
+    i = 0
     while not lastpage:
         data = get_url('/query.py', params={'kindid':2, 'page':page})
 
@@ -28,7 +32,8 @@ def page_crawler():
             t['serverid'] = x['equip_serverid']
             t['price'] = int(re.match(r'￥(\d+)', x['price_desc']).group(1))
             t['score'] = int(re.match(r'性别:.  装备评分:(\d+)', x['subtitle']).group(1))
-            yield t
+            i += 1
+            yield t, i
 
         lastpage = data['is_last_page']
         print('Finish Page:', page)
@@ -48,7 +53,7 @@ def role_crawler(sn, serverid):
     item = {}
 
     item['serverid'] = serverid
-    item['lastest'] = time.asctime(time.localtime(time.time()))
+    item['lastest'] = get_time()
     
     item['name'] = data['equip_name']
     item['price'] = data['price'] // 100
@@ -71,16 +76,12 @@ def role_crawler(sn, serverid):
     item['level'] = base['Level']
 
     item['pets'] = []
-    item['pets_legend_count'] = 0
     for x in pets:
         t = {}
         t['name'] = x['Type']
         t['type'] = x['Attr']['DangCi']
         t['progress'] = x['Attr']['ZhuanSheng']
         item['pets'].append(t)
-
-        if (t['type'], t['progress']) == ('钻石卡', '0/0'):
-            item['pets_legend_count'] += 1
 
     item['equip_info'] = []
     for s in equip:
@@ -92,41 +93,39 @@ def role_crawler(sn, serverid):
         
     return item
 
-def work(src, only_lastest=True):
+def work(src):
     with open(src, 'r') as f:
         data = json.load(f)
+
+    for y, x in data.items():
+        x['exist'] = False
     
-    i = 0
-    for x in page_crawler():
+    for x, i in page_crawler():
         sn = x['sn']
         if sn in data:
-            if x['price'] != data[sn]['price']:
-                try:
-                    data[sn]['minprice'] = min(x['price'], data[sn]['minprice'])
-                except:
-                    data[sn]['minprice'] = x['price']
-                data[sn]['price'] = x['price']
-                print('Change:', i, data[sn]['name'], '￥', data[sn]['price'], data[sn]['score'], sep=' ')
-                i += 1
+            d = data[sn]
+            d['exist'] = True
+
+            if x['price'] != d['price']:
+                d['price'] = x['price']
+                d['minprice'] = min(d['price'], d['minprice'])
+                d['lastest'] = get_time()
+                
+                print('Change:', i, d['name'], '￥' + str(d['price']), d['score'], sep=' ')
                 continue
             
-            if x['score'] == data[sn]['score']:
-                if only_lastest:
-                    print('Stopped at:', i)
-                    break
-                i += 1
+            if x['score'] == d['score']:
                 continue
         
         item = role_crawler(sn, x['serverid'])
         if item:
             data[sn] = item
-            print('New:', i, item['name'], '￥', item['price'], item['score'], sep=' ')
+            data[sn]['exist'] = True
+            print('New:', i, item['name'], '￥' + str(item['price']), item['score'], sep=' ')
         else:
-            print('Bad at ', x['price'], ' ', x['score'])
+            #print('Bad at:', i, '￥' + str(x['price']), x['score'], sep=' ')
 
-        i += 1
-
-    print('Crawler success')
+    print('Network success')
     with open(src, 'w') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
     print('Refresh success')

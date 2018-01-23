@@ -11,9 +11,6 @@ class App(tk.Frame):
         self.master.geometry("300x600")
         self.pack()
 
-        #self.panel = tk.Label(self, image = img)
-        #self.panel.image = img
-        #self.panel.pack()#side = "bottom", fill = "both", expand = "yes")
         self.refresh()
         
         self.input = tk.Entry(self)

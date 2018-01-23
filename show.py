@@ -2,17 +2,25 @@ import json
 import re
 import sys
 
-def show_items(items):
-    string = '￥{0: <5}  {1: >5}  {2[0]} {2[1]} {2[2]}  {3: >3}'
+def show_items(items, lastest):
+    string = ' ￥{0: <5} {1: >5}  {2[0]} {2[1]} {2[2]}  {3: >3}'
     for y, x in items:
         if x['score'] < 30000:
             continue
 
+        if not x['exist']:
+            print('x', end='')
+        elif x['lastest'] == lastest:
+            print('N', end='')
+        else:
+            print(' ', end='')
+
         n = [0, 0, 0]
-        n[0] = x['pets_legend_count']
         for pet in x['pets']:
             if pet['type'] == '钻石卡':
-                if re.match(r'\d+/10440', pet['progress']):
+                if re.match(r'0/0', pet['progress']):
+                    n[0] += 1
+                elif re.match(r'\d+/10440', pet['progress']):
                     n[1] += 1
                 elif re.match(r'\d+/1510', pet['progress']):
                     n[2] += 1
@@ -42,11 +50,12 @@ def show(src, output):
     with open(src, 'r') as f:
         items = json.load(f)
     
+    lastest = max([x[1]['lastest'] for x in items.items()])
     s = sorted(items.items(), key=lambda x:x[1]['score']/x[1]['price'], reverse=True)
     with open(output, 'w') as f:
         t = sys.stdout
         sys.stdout = f
-        show_items(s)
+        show_items(s, lastest)
         sys.stdout = t
     
     print('Show success')
