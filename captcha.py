@@ -7,28 +7,29 @@ class App(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
 
-        self.master.title('captcha')
-        self.master.geometry("300x600")
+        self.master.title('captcha verify')
+        self.master.geometry("300x150")
         self.pack()
 
+        self.panel = tk.Label(self)
+        self.panel.pack()
         self.refresh()
         
         self.input = tk.Entry(self)
         self.input.pack()
 
-        self.button = tk.Button(self, text='send', command=self.send)
-        self.button.pack()
+        self.button = tk.Button(self, text='confirm', command=self.send)
+        self.button.pack(side='left', expand='yes')
 
         self.button2 = tk.Button(self, text='refresh', command=self.refresh)
-        self.button2.pack()
+        self.button2.pack(side='left', expand='yes')
     
     def refresh(self):
         data = requests.get('http://dtws-android2.cbg.163.com/cbg-center//captcha_auth.py', params={'act':'query_captcha'})
         rawimg = Image.open(BytesIO(data.content))
         img = ImageTk.PhotoImage(rawimg)
-        self.panel = tk.Label(self, image = img)
+        self.panel.config(image=img)
         self.panel.image = img
-        self.panel.pack()
         self.cookies = data.cookies
     
     def send(self):
