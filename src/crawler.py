@@ -123,6 +123,7 @@ def work(src):
             data[sn]['exist'] = True
             print('New:', i, item['name'], '￥' + str(item['price']), item['score'], sep=' ')
         else:
+            pass
             #print('Bad at:', i, '￥' + str(x['price']), x['score'], sep=' ')
 
     print('Network success')
