@@ -3,7 +3,6 @@ import os
 import json
 
 template_dir = os.path.abspath('../web')
-print(template_dir)
 app = Flask(__name__, static_url_path='', template_folder='f:\\dtws-crawler\\web')
 
 def gen():
@@ -41,10 +40,18 @@ def gen():
     return header, table
 
 @app.route('/')
+def index():
+    with open('web\\index.html', 'r', encoding='utf-8') as f:
+        html = f.read()
+
+    return html
+
+@app.route('/data.json')
 def home():
     header, table = gen()
-
-    return render_template('index.html', header=header, table=table)
+    data = {}
+    data['data'] = table
+    return json.dumps(data)
 
 @app.route('/<string:folder>/<path:path>')
 def send_file(folder, path):
@@ -52,4 +59,4 @@ def send_file(folder, path):
     return send_from_directory('f:\\dtws-crawler\\web\\' + folder, path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5001)

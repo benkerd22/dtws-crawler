@@ -3,25 +3,46 @@
 <head>
     <meta charset="utf-8">
     <title>角色详情 - 大唐无双藏宝阁</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <script src="js/my.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#myTable').DataTable( {
+            "ajax": "data.json"
+        } );
+    } );
+    </script>
 </head>
 
 <body>
-<table id="myTable">
-    <tr>
-    <!--When a header is clicked, run the sortTable function, with a parameter, 0 for sorting by names, 1 for sorting by country:-->  
-        {% for i in range(header|length) %}
-        <th onclick="sortTable(0)">{{ header[i] }}</th>
-        {% endfor %}
-    </tr>
-    {% for row in table %}
-    <tr>
-        {% for element in row %}
-        <td>{{ element }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
+<table id="myTable" class="display" cellspacing="0" width="100%">
+    <thead>
+        <!--header = ['状态', '性价比', '价格', '评分', '武将', '收藏人数', '昵称', '职业']-->
+        <tr>
+            <th>状态</th>
+            <th>性价比</th>
+            <th>价格</th>
+            <th>评分</th>
+            <th>武将</th>
+            <th>收藏人数</th>
+            <th>昵称</th>
+            <th>职业</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!--header = ['状态', '性价比', '价格', '评分', '武将', '收藏人数', '昵称', '职业']-->
+        <tr>
+            <th>状态</th>
+            <th>性价比</th>
+            <th>价格</th>
+            <th>评分</th>
+            <th>武将</th>
+            <th>收藏人数</th>
+            <th>昵称</th>
+            <th>职业</th>
+        </tr>
+    </tbody>
 </table>
 </body>
 </html>
