@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>角色详情 - 大唐无双藏宝阁</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/my.js"></script>
+</head>
+
+<body>
+<table id="myTable">
+    <tr>
+    <!--When a header is clicked, run the sortTable function, with a parameter, 0 for sorting by names, 1 for sorting by country:-->  
+        {% for i in range(header|length) %}
+        <th onclick="sortTable(0)">{{ header[i] }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in table %}
+    <tr>
+        {% for element in row %}
+        <td>{{ element }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
