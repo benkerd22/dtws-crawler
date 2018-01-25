@@ -9,7 +9,7 @@ app = Flask(__name__, static_url_path='', template_folder='f:\\dtws-crawler\\web
 def get_plus_num(s):
     ret = re.match(r'.+?\((.+?)\)', s).group(1)
     if ret[0] == '+':
-        return ret[1:]
+        return int(ret[1:])
     return ret
 
 def gen():
@@ -17,7 +17,6 @@ def gen():
         data = json.load(f)
     
     lastest = max([x[1]['lastest'] for x in data.items()])
-    header = ['状态', '性价比', '价格', '评分', '武将', '收藏人数', '昵称', '职业']
     '状态 性价比 价格 战力 收藏人数 武将（3） 武器（6） 饰品（4） 护心镜 披风 昵称 职业'
     ' 0     1     2    3    4      567      8-13      14-17    18    19   20  21 '
     table = []
@@ -34,7 +33,7 @@ def gen():
             row[0] = '  '
         
         row[1] = x['score'] // x['price']
-        row[2] = x['price']
+        row[2] = '¥' + str(x['price'])
         row[3] = x['score']
         row[4] = x['collect']
 
@@ -54,18 +53,18 @@ def gen():
             try:
                 row[col] = get_plus_num(equip[index])
             except:
-                row[col] = ' '
+                row[col] = 0
         
         try:
             row[19] = equip[15]
         except:
-            row[19] = ' '
+            row[19] = '空'
         row[20] = x['name']
         row[21] = x['type'].replace('（', '(').replace('）', ')')
 
         table.append(row)
     
-    return header, table
+    return table
 
 @app.route('/')
 def index():
@@ -76,9 +75,8 @@ def index():
 
 @app.route('/data.json')
 def home():
-    header, table = gen()
     data = {}
-    data['data'] = table
+    data['data'] = gen()
     return json.dumps(data)
 
 @app.route('/<string:folder>/<path:path>')
@@ -87,4 +85,4 @@ def send_file(folder, path):
     return send_from_directory('f:\\dtws-crawler\\web\\' + folder, path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5000)
