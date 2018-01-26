@@ -4,6 +4,7 @@ import time
 import re
 import os
 import captcha
+import comm
 
 def get_url(url, **kw):
     qurl = 'http://dtws-android2.cbg.163.com/cbg-center/'
@@ -45,6 +46,7 @@ def page_crawler():
         lastpage = data['is_last_page']
         print('Finish Page:', page)
         page += 1
+        comm.progress += 1
 
 def role_crawler(sn, serverid):
     data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
@@ -203,6 +205,7 @@ def work(src='data.txt'):
         json.dump(gen_dataTable(data), f)
 
     print('Refresh success')
+    comm.progress = 50
 
 if __name__ == '__main__':
     work()
