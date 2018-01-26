@@ -2,6 +2,7 @@ import requests
 import json
 import time
 import re
+import os
 import captcha
 
 def get_url(url, **kw):
@@ -18,6 +19,12 @@ def get_url(url, **kw):
 
 def get_time():
     return time.strftime('%Y-%m-%d %H', time.localtime())
+
+def get_plus_num(s):
+    ret = re.match(r'.+?\((.+?)\)', s).group(1)
+    if ret[0] == '+':
+        return int(ret[1:])
+    return ret
 
 def page_crawler():
     lastpage = False
@@ -93,9 +100,70 @@ def role_crawler(sn, serverid):
         
     return item
 
-def work(src):
-    with open(src, 'r') as f:
-        data = json.load(f)
+def gen_dataTable(data):
+    '状态 性价比 价格 战力 收藏人数 武将（3） 武器（6） 饰品（4） 护心镜 披风 昵称 职业'
+    ' 0     1     2    3    4      567      8-13      14-17    18    19   20  21 '
+
+    lastest = max([x[1]['lastest'] for x in data.items()])
+    
+    table = []
+    for sn, x in data.items():
+        row = []
+        for i in range(22):
+            row.append('')
+
+        if not x['exist']:
+            status = '下架'
+        elif x['lastest'] == lastest:
+            status = '新！'
+        else:
+            status = '正常'
+        row[0] = status
+
+        row[1] = x['score'] // x['price']
+        row[2] = '¥' + str(x['price'])
+        row[3] = x['score']
+        row[4] = x['collect']
+
+        row[5], row[6], row[7] = 0, 0, 0
+        for pet in x['pets']:
+            if pet['type'] == '钻石卡':
+                if re.match(r'0/0', pet['progress']):
+                    row[5] += 1
+                elif re.match(r'\d+/10440', pet['progress']):
+                    row[6] += 1
+                elif re.match(r'\d+/1510', pet['progress']):
+                    row[7] += 1
+
+        equip = x['equip_info']
+        edict = {8:0, 9:6, 10:7, 11:8, 12:9, 13:10, 14:4, 15:5, 16:11, 17:12, 18:16}
+        for col, index in edict.items():
+            try:
+                row[col] = get_plus_num(equip[index])
+            except:
+                row[col] = 0
+        
+        try:
+            row[19] = equip[15]
+        except:
+            row[19] = '空'
+        row[20] = x['name']
+        row[21] = x['type'].replace('（', '(').replace('）', ')')
+
+        table.append(row)
+    
+    real_data = {}
+    real_data['data'] = table
+    return real_data
+
+def work(src='data.txt'):
+    if not os.path.exists(src):
+        with open(src, 'w') as f:
+            f.write('{}')
+        data = {}
+    else:
+        with open(src, 'r') as f:
+            data = json.load(f)
 
     for y, x in data.items():
         x['exist'] = False
@@ -127,6 +195,11 @@ def work(src):
             #print('Bad at:', i, '￥' + str(x['price']), x['score'], sep=' ')
 
     print('Network success')
+
     with open(src, 'w') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
+
+    with open('dataTable.json', 'w') as f:
+        json.dump(gen_dataTable(data), f)
+
     print('Refresh success')
