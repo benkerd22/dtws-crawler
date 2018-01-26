@@ -16,7 +16,7 @@ def index():
     return html
 
 @app.route('/dataTable.json')
-def home():
+def rawdata():
     with open('dataTable.json') as f:
         return f.read()
 
