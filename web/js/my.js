@@ -1,54 +1,88 @@
-function sortTable(n) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById("myTable");
-    switching = true;
-    //Set the sorting direction to ascending:
-    dir = "asc"; 
-    /*Make a loop that will continue until
-    no switching has been done:*/
-    while (switching) {
-      //start by saying: no switching is done:
-      switching = false;
-      rows = table.getElementsByTagName("TR");
-      /*Loop through all table rows (except the
-      first, which contains table headers):*/
-      for (i = 1; i < (rows.length - 1); i++) {
-        //start by saying there should be no switching:
-        shouldSwitch = false;
-        /*Get the two elements you want to compare,
-        one from current row and one from the next:*/
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
-        /*check if the two rows should switch place,
-        based on the direction, asc or desc:*/
-        if (dir == "asc") {
-          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-            //if so, mark as a switch and break the loop:
-            shouldSwitch= true;
-            break;
+$(document).ready(function() {
+  var table = $('#myTable').DataTable( {
+      fixedHeader: true,
+      "search": {
+          "regex": true
+      },
+      "lengthMenu": [ 30, 50, 100, 200 ],
+      "order": [[ 1, 'desc']],
+      "pageLength": 50,
+      "columnDefs": [ 
+          { 
+              "type": "num-fmt", 
+              "targets": [2] },
+          { 
+              "data": 0, 
+              "targets":[0] 
           }
-        } else if (dir == "desc") {
-          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-            //if so, mark as a switch and break the loop:
-            shouldSwitch= true;
-            break;
+      ],
+      aoColumnDefs: [
+          {
+              orderSequence: ["desc", "asc"],
+              aTargets: ['_all']
           }
-        }
+      ],
+      dom: 'lfrtip',
+      "ajax": "data.json",
+      "rowCallback": function(row, data, index) {
+          if (data[0] == "下架") {
+              $(row).find('td:eq(0)').css('color', 'grey');
+          }
+          if (data[0] == "新！") {
+              $(row).find('td:eq(0)').css('color', 'blue');
+          }
+          if (data[0] == "正常") {
+              $(row).find('td:eq(0)').css('color', 'green');
+          }
+
+          if (data[5] != "0") {
+              $(row).find('td:eq(5)').css('color', 'red')
+          }
+
+          var i;
+
+          var list = [5, 6, 7, 14, 15, 16, 17];
+          for (i in list) {
+              if (data[i] == "0" || data[i] == 0) {
+                  $(row).find('td:eq(' + i + ')').css('color', 'grey')
+              }
+          }
+
+          for (i = 8; i < 14; i++) {
+              if (data[i] == "17") {
+                  $(row).find('td:eq(' + i + ')').css('color', 'blue');
+              } else if (data[i] == "18") {
+                  $(row).find('td:eq(' + i + ')').css('color', 'red');
+              } else {
+                  $(row).find('td:eq(' + i + ')').css('color', 'grey');
+              }
+          }
       }
-      if (shouldSwitch) {
-        /*If a switch has been marked, make the switch
-        and mark that a switch has been done:*/
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-        //Each time a switch is done, increase this count by 1:
-        switchcount ++;      
+  } );
+
+  var count = true;
+
+  $("#changeStatus").on("click", function(e) {
+      var btn = document.getElementById("changeStatus");
+      if (count) {
+          table
+              .column(0)
+              .search("正常|新！", true)
+              .draw();
+          btn.innerText = "显示全部"
       } else {
-        /*If no switching has been done AND the direction is "asc",
-        set the direction to "desc" and run the while loop again.*/
-        if (switchcount == 0 && dir == "asc") {
-          dir = "desc";
-          switching = true;
-        }
+          table
+              .column(0)
+              .search("", true)
+              .draw();
+          btn.innerText = "仅显示在售"
       }
-    }
-  }
+      count = !count;
+  });
+} );
+
+
+$('#myTable')
+		.removeClass( 'display' )
+		.addClass('table table-striped table-bordered table-hover table-condensed');
+
