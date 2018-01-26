@@ -63,8 +63,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     
     <script>
+    var table;
+
     $(document).ready(function() {
-        var table = $("#myTable").DataTable( {
+        table = $("#myTable").DataTable( {
             fixedHeader: true,
             "search": {
                 "regex": true
@@ -121,26 +123,26 @@
                 }
             }
         } );
+    });
 
-        var count = true;
+    var count = true;
 
-        $("#changeStatus").on("click", function(e) {
-            var btn = document.getElementById("changeStatus");
-            if (count) {
-                table
-                    .column(0)
-                    .search("正常|新！", true)
-                    .draw();
-                btn.innerText = "显示全部"
-            } else {
-                table
-                    .column(0)
-                    .search("", true)
-                    .draw();
-                btn.innerText = "仅显示在售"
-            }
-            count = !count;
-        });
+    $("#changeStatus").on("click", function(e) {
+        var btn = document.getElementById("changeStatus");
+        if (count) {
+            table
+                .column(0)
+                .search("正常|新！", true)
+                .draw();
+            btn.innerText = "显示全部"
+        } else {
+            table
+                .column(0)
+                .search("", true)
+                .draw();
+            btn.innerText = "仅显示在售"
+        }
+        count = !count;
     });
 
     $("#crawlerRefresh").on("click", function(e) {
@@ -158,6 +160,8 @@
                     $("#crawlerProgress").css('width', res.progress+'%');//.attr("aria-valuenow", res.progress);
 
                     if (res.status == 1) {
+                        table.ajax.reload();
+
                         $("#crawlerRefresh")
                             .prop("disabled", false)
                             .removeClass("btn-outline-secondary")
