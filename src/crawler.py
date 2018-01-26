@@ -203,3 +203,6 @@ def work(src='data.txt'):
         json.dump(gen_dataTable(data), f)
 
     print('Refresh success')
+
+if __name__ == '__main__':
+    work()

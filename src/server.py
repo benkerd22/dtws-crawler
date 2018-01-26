@@ -4,9 +4,15 @@ import re
 import json
 import crawler
 import threading
+import time
 
 app = Flask(__name__, static_url_path='')
 th = threading.Thread()
+
+def myfunc():
+    time.sleep(5)
+    print('wake up...')
+    crawler.work()
 
 @app.route('/')
 def index():
@@ -24,7 +30,7 @@ def rawdata():
 def crawler_refresh():
     global th
     if not th.isAlive():
-        th = threading.Thread(target=crawler.work())
+        th = threading.Thread(target=myfunc)
         th.start()
         return "Now working"
     else:
