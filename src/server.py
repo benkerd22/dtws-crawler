@@ -26,12 +26,13 @@ def gen():
             row.append('')
 
         if not x['exist']:
-            row[0] = '下架'
+            status = '下架'
         elif x['lastest'] == lastest:
-            row[0] = '新！'
+            status = '新！'
         else:
-            row[0] = '  '
-        
+            status = '正常'
+        row[0] = status
+
         row[1] = x['score'] // x['price']
         row[2] = '¥' + str(x['price'])
         row[3] = x['score']
