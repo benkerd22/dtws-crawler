@@ -30,6 +30,7 @@ def get_plus_num(s):
 def page_crawler():
     lastpage = False
     page = 1
+    comm.nowpage = 1
     i = 0
     while not lastpage:
         data = get_url('/query.py', params={'kindid':2, 'page':page})
@@ -46,7 +47,7 @@ def page_crawler():
         lastpage = data['is_last_page']
         print('Finish Page:', page)
         page += 1
-        comm.progress += 1
+        comm.nowpage += 1
 
 def role_crawler(sn, serverid):
     data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
@@ -205,7 +206,7 @@ def work(src='data.txt'):
         json.dump(gen_dataTable(data), f)
 
     print('Refresh success')
-    comm.progress = 50
+    comm.nowpage = comm.maxpage
 
 if __name__ == '__main__':
     work()

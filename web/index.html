@@ -1,57 +1,66 @@
 <!doctype html>
 <html lang="zh">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- DataTable CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.2.1/jszip-2.5.0/dt-1.10.16/af-2.2.2/b-1.5.1/b-colvis-1.5.1/b-flash-1.5.1/b-html5-1.5.1/b-print-1.5.1/cr-1.4.1/fc-3.2.4/fh-3.1.3/kt-2.3.2/r-2.2.1/rg-1.0.2/rr-1.2.3/sc-1.4.3/sl-1.2.4/datatables.min.css"/>
+        <!-- DataTable CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jq-3.2.1/jszip-2.5.0/dt-1.10.16/af-2.2.2/b-1.5.1/b-colvis-1.5.1/b-flash-1.5.1/b-html5-1.5.1/b-print-1.5.1/cr-1.4.1/fc-3.2.4/fh-3.1.3/kt-2.3.2/r-2.2.1/rg-1.0.2/rr-1.2.3/sc-1.4.3/sl-1.2.4/datatables.min.css"/>
     
-    <title>角色详情 - 大唐无双藏宝阁</title>
-  </head>
-  <body>
+        <title>角色详情 - 大唐无双藏宝阁</title>
+    </head>
+    <body>
     <div class="container-fluid">
-
-      <button id="changeStatus" class="btn btn-outline-primary" type="button">仅显示在售</button>
-      <button id="crawlerRefresh" class="btn btn-outline-primary" type="button">重新爬取</button>
-      
-      <div class="progress">
-        <div id="crawlerProgress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-                
-      <table id="myTable" class="display" width="100%">
+        <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-1"><button id="changeStatus" class="btn btn-outline-primary" type="button">显示全部</button></div>
+            <div class="col-lg-5"><button id="crawlerRefresh" class="btn btn-outline-primary" type="button">重新爬取</button></div>
+            <!--
+            <div class="col-1">
+                <h5>服务器端进度</h5>
+            </div>-->
+            <div class="col-xl-6">
+                <div class="progress">
+                    <div id="crawlerProgress" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+        </div>
+     
+        <table id="myTable" class="display" width="100%">
         <thead>
-          <tr>
-            <th>状态</th>
-            <th>性价比</th>
-            <th>价格</th>
-            <th>评分</th>
-            <th>收藏</th>
-            <th>一阶</th>
-            <th>二阶</th>
-            <th>三阶</th>
-            <th>武器</th>
-            <th>头</th>
-            <th>身</th>
-            <th>腰</th>
-            <th>手</th>
-            <th>脚</th>
-            <th>饰品</th>
-            <th>饰品</th>
-            <th>饰品</th>
-            <th>饰品</th>
-            <th>护心镜</th>
-            <th>披风</th>
-            <th>昵称</th>
-            <th>职业</th>
-          </tr>
+            <tr>
+                <th>状态</th>
+                <th>性价比</th>
+                <th>价格</th>
+                <th>评分</th>
+                <th>收藏</th>
+                <th>一阶</th>
+                <th>二阶</th>
+                <th>三阶</th>
+                <th>武器</th>
+                <th>头</th>
+                <th>身</th>
+                <th>腰</th>
+                <th>手</th>
+                <th>脚</th>
+                <th>饰品</th>
+                <th>饰品</th>
+                <th>饰品</th>
+                <th>饰品</th>
+                <th>护心镜</th>
+                <th>披风</th>
+                <th>昵称</th>
+                <th>职业</th>
+            </tr>
         </thead>
-      </table>
+    </table>
     </div>
+
     <!-- Optional JavaScript -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
@@ -71,9 +80,9 @@
             "search": {
                 "regex": true
             },
-            "lengthMenu": [ 30, 50, 100, 200 ],
+            "lengthMenu": [ 20, 50, 100, 200 ],
             "order": [[1, "desc"]],
-            "pageLength": 50,
+            "pageLength": 20,
             "columnDefs": [ 
                 { 
                     "type": "num-fmt", 
@@ -123,34 +132,40 @@
                 }
             }
         } );
+
+        table
+            .column(0)
+            .search("正常|新！", true)
+            .draw();
     });
 
-    var count = true;
-
-    $("#changeStatus").on("click", function(e) {
-        var btn = document.getElementById("changeStatus");
+    var count = false;
+    $("#changeStatus").click( function(e) {
         if (count) {
             table
                 .column(0)
                 .search("正常|新！", true)
                 .draw();
-            btn.innerText = "显示全部"
+            $(this).text("显示全部");
         } else {
             table
                 .column(0)
                 .search("", true)
                 .draw();
-            btn.innerText = "仅显示在售"
+            $(this).text("仅显示在售");
         }
         count = !count;
     });
 
-    $("#crawlerRefresh").on("click", function(e) {
+    $("#crawlerRefresh").click( function(e) {
         $(this)
             .prop("disabled", true)
             .removeClass("btn-outline-primary")
-            .addClass("btn-outline-secondary");
-        document.getElementById("crawlerRefresh").innerText = "正在爬取";
+            .addClass("btn-outline-secondary")
+            .text("正在爬取...");
+        
+        $(".progress").show();
+        $("#crawlerProgress").removeClass("bg-success");
 
         (function busyRequest() {
             var xhttp = new XMLHttpRequest();
@@ -161,12 +176,16 @@
 
                     if (res.status == 1) {
                         table.ajax.reload();
+                        table
+                            .order( [0, 'asc'], [1, 'desc'] )
+                            .draw();
 
                         $("#crawlerRefresh")
                             .prop("disabled", false)
                             .removeClass("btn-outline-secondary")
-                            .addClass("btn-outline-primary");
-                        document.getElementById("crawlerRefresh").innerText = "重新爬取";
+                            .addClass("btn-outline-primary")
+                            .text("重新爬取");
+                        $("#crawlerProgress").addClass("bg-success");
                     } else {
                         setTimeout(busyRequest, 1000);
                     }
@@ -180,6 +199,11 @@
     $("#myTable")
 		.removeClass("display")
 		.addClass("table table-striped table-bordered table-hover table-condensed table-sm");
+
+
+    $(".progress").hide();
+    
     </script>
-</body>
+
+    </body>
 </html>

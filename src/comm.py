@@ -1,3 +1,6 @@
 def init():
-    global progress
-    progress = 0
+    global nowpage
+    global maxpage
+
+    nowpage = 0
+    maxpage = 50

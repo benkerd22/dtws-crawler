@@ -10,10 +10,10 @@ app = Flask(__name__, static_url_path='')
 th = threading.Thread()
 
 def myfunc():
-    time.sleep(3);
+    time.sleep(1);
     print('wake up')
     crawler.work()
-    time.sleep(5);
+    time.sleep(10);
 
 @app.route('/')
 def index():
@@ -31,16 +31,17 @@ def rawdata():
 def crawler_refresh():
     global th
 
+    response = {}
+    response['status'] = (comm.nowpage == comm.maxpage)
+    response['progress'] = comm.nowpage / comm.maxpage * 100
+
+    if comm.nowpage == comm.maxpage:
+        comm.nowpage = 0
+
     if not th.isAlive():
         th = threading.Thread(target=myfunc)
         th.start()
     
-    response = {}
-    response['status'] = comm.progress == 50
-    response['progress'] = comm.progress * 2
-
-    if comm.progress == 50:
-        comm.progress = 0
     return json.dumps(response)
 
 @app.route('/<string:folder>/<path:path>')
