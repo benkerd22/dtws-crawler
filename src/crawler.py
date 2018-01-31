@@ -1,20 +1,25 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+'A tiny crawler for dtws Android API'
 
-import requests
-import json
 import time
+import json
 import re
 import os
+import requests
 #import captcha
 import comm
 
 def auth():
+    'Ask for captcha authentication'
+
     comm.needcaptcha = True
     while not comm.needcaptcha:
         time.sleep(1.5)
 
 def get_url(url, **kw):
+    'A wrapper for dtws URL request'
+
     qurl = 'http://dtws-android2.cbg.163.com/cbg-center/'
     succ = -1
     while succ != 1:
@@ -27,15 +32,21 @@ def get_url(url, **kw):
     return data
 
 def get_time():
+    'Get time'
+
     return time.strftime('%Y-%m-%d %H', time.localtime())
 
-def get_plus_num(s):
-    ret = re.match(r'.+?\((.+?)\)', s).group(1)
+def get_plus_num(equip_name):
+    'Get plus number in an equip name, such as ...(+18)'
+
+    ret = re.match(r'.+?\((.+?)\)', equip_name).group(1)
     if ret[0] == '+':
         return int(ret[1:])
     return ret
 
 def page_crawler():
+    'Page crawler'
+
     lastpage = False
     page = 1
     comm.nowpage = 1
@@ -57,8 +68,13 @@ def page_crawler():
         page += 1
         comm.nowpage += 1
 
-def role_crawler(sn, serverid):
-    data = get_url('/query.py', params={'act':'get_equip_detail', 'game_ordersn':sn, 'serverid':serverid})
+def role_crawler(role_sn, role_serverid):
+    'Get role detail'
+
+    data = get_url('/query.py', params={
+        'act':'get_equip_detail',
+        'game_ordersn':role_sn,
+        'serverid':role_serverid})
 
     data = data['equip']
     if data['appointed_roleid'] != '':
@@ -70,9 +86,9 @@ def role_crawler(sn, serverid):
     equip = detail['RoleStatus']["EquipInfo"]
     item = {}
 
-    item['serverid'] = serverid
+    item['serverid'] = role_serverid
     item['lastest'] = get_time()
-    
+
     item['name'] = data['equip_name']
     item['price'] = data['price'] // 100
     item['minprice'] = item['price']
@@ -82,7 +98,7 @@ def role_crawler(sn, serverid):
     item['icon'] = data['icon']
     item['status'] = data['status_desc'] + '，' + data['fair_show_end_time_desc']
     item['collect'] = data['collect_num']
-    
+
     item['score'] = int(base['PingFen'])
     item['rank_world'] = base['ShiJiePaiMing']
     item['rank_local'] = base['MenPaiPaiMing']
@@ -103,20 +119,20 @@ def role_crawler(sn, serverid):
 
     item['equip_info'] = []
     for s in equip:
-        d = list(filter(None, map(lambda x:x.strip(), re.split(r'#[0-9a-zA-Z\_]{1,9}', s))))
+        d = list(filter(None, map(lambda x: x.strip(), re.split(r'#[0-9a-zA-Z\_]{1,9}', s))))
         try:
             item['equip_info'].append(d[1])
         except:
             item['equip_info'].append('')
-        
+
     return item
 
-def gen_dataTable(data):
+def gen_datatable(data):
     '状态 性价比 价格 战力 收藏人数 武将（3） 武器（6） 饰品（4） 护心镜 披风 昵称 职业'
     ' 0     1     2    3    4      567      8-13      14-17    18    19   20  21 '
 
     lastest = max([x[1]['lastest'] for x in data.items()])
-    
+
     table = []
     for sn, x in data.items():
         row = []
@@ -153,7 +169,7 @@ def gen_dataTable(data):
                 row[col] = get_plus_num(equip[index])
             except:
                 row[col] = 0
-        
+
         try:
             row[19] = equip[15]
         except:
@@ -162,12 +178,14 @@ def gen_dataTable(data):
         row[21] = x['type'].replace('（', '(').replace('）', ')')
 
         table.append(row)
-    
+
     real_data = {}
     real_data['data'] = table
     return real_data
 
 def work(src='data.txt'):
+    'Crawler main route'
+
     if not os.path.exists(src):
         with open(src, 'w') as f:
             f.write('{}')
@@ -178,7 +196,7 @@ def work(src='data.txt'):
 
     for y, x in data.items():
         x['exist'] = False
-    
+
     for x, i in page_crawler():
         sn = x['sn']
         if sn in data:
@@ -189,13 +207,13 @@ def work(src='data.txt'):
                 d['price'] = x['price']
                 d['minprice'] = min(d['price'], d['minprice'])
                 d['lastest'] = get_time()
-                
+
                 print('Change:', i, d['name'], '￥' + str(d['price']), d['score'], sep=' ')
                 continue
-            
+
             if x['score'] == d['score']:
                 continue
-        
+
         item = role_crawler(sn, x['serverid'])
         if item:
             data[sn] = item
@@ -211,7 +229,7 @@ def work(src='data.txt'):
         json.dump(data, f, indent=4, ensure_ascii=True)
 
     with open('dataTable.json', 'w') as f:
-        json.dump(gen_dataTable(data), f)
+        json.dump(gen_datatable(data), f)
 
     print('Refresh success')
     comm.nowpage = comm.maxpage

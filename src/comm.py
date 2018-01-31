@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+'Global variables for crossing files'
 
 def init():
+    'initialize cross-files variables'
+
     global nowpage
     global maxpage
     global needcaptcha
