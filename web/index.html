@@ -16,13 +16,24 @@
     <body>
     <div class="container-fluid">
         <div class="container-fluid">
+        <div class="container">
+            <div class="alert alert-primary" role="alert">
+                <div class="row justify-content-start">
+                    <div class="col-2"><img id="captchaImg" src="" class="img-fluid"></div>
+                    <div class="col-3"><input id="captchaInput" class="form-control" placeholder="请输入验证码"/></div>
+                    <div class="col-1"><button id="captchaConfirm" class="btn btn-primary">提交</button></div>
+                    <div class="col-1"><button id="captchaRefresh" class="btn btn-secondary">刷新</button></div>
+                </div>
+            </div>
+        </div>
         <div class="row align-items-center">
             <div class="col-1"><button id="changeStatus" class="btn btn-outline-primary" type="button">显示全部</button></div>
             <div class="col-lg-5"><button id="crawlerRefresh" class="btn btn-outline-primary" type="button">重新爬取</button></div>
             <!--
             <div class="col-1">
                 <h5>服务器端进度</h5>
-            </div>-->
+            </div>
+            -->
             <div class="col-xl-6">
                 <div class="progress">
                     <div id="crawlerProgress" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
@@ -139,8 +150,29 @@
             .draw();
     });
 
+    function needCaptcha() {
+        $("#captchaImg").attr("src", "captcha.jpg?_=" + new Date().getTime())
+    }
+
+    $("#captchaRefresh").click(needCaptcha);
+
+    $("#captchaConfirm").click(function(e) {
+        var captcha, xhttp;
+
+        captcha = $("#captchaInput").val();
+
+        xhttp = new XMLHttpRequest;
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                $("#captchaConfirm").prop("disabled", true);
+            }
+        }
+        xhttp.open("GET", "check_captcha?ans=" + captcha, true);
+        xhttp.send();
+    });
+
     var count = false;
-    $("#changeStatus").click( function(e) {
+    $("#changeStatus").click(function(e) {
         if (count) {
             table
                 .column(0)
@@ -157,7 +189,7 @@
         count = !count;
     });
 
-    $("#crawlerRefresh").click( function(e) {
+    $("#crawlerRefresh").click(function(e) {
         $(this)
             .prop("disabled", true)
             .removeClass("btn-outline-primary")
@@ -166,6 +198,22 @@
         
         $(".progress").show();
         $("#crawlerProgress").removeClass("bg-success");
+
+        var timeRemain;
+        function waitForNext() {
+            timeRemain--;
+
+            if (timeRemain == 0) {
+                $("#crawlerRefresh")
+                    .prop("disabled", false)
+                    .removeClass("btn-outline-secondary")
+                    .addClass("btn-outline-primary")
+                    .text("重新爬取");
+            } else {
+                $("#crawlerRefresh").text("重新爬取(" + timeRemain + ")");
+                setTimeout(waitForNext, 1000);
+            }
+        }
 
         (function busyRequest() {
             var xhttp = new XMLHttpRequest();
@@ -178,14 +226,20 @@
                         table.ajax.reload();
                         table
                             .order( [0, 'asc'], [1, 'desc'] )
+                            .search("正常|新！", true)
                             .draw();
+                        $("#changeStatus").text("显示全部");
+                        $("#crawlerProgress")
+                            .removeClass("bg-warning")
+                            .addClass("bg-success");
 
-                        $("#crawlerRefresh")
-                            .prop("disabled", false)
-                            .removeClass("btn-outline-secondary")
-                            .addClass("btn-outline-primary")
-                            .text("重新爬取");
-                        $("#crawlerProgress").addClass("bg-success");
+                        timeRemain = 5;
+                        $("#crawlerRefresh").text("重新爬取（" + timeRemain + "）");
+                        setTimeout(waitForNext, 1000);
+                    } else if (res.status == 2) {
+                        $("#crawlerProgress")
+                            .addClass("bg-warning")
+                        needCaptcha();
                     } else {
                         setTimeout(busyRequest, 1000);
                     }

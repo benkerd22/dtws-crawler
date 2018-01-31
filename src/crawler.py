@@ -1,17 +1,25 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 import requests
 import json
 import time
 import re
 import os
-import captcha
+#import captcha
 import comm
+
+def auth():
+    comm.needcaptcha = True
+    while not comm.needcaptcha:
+        time.sleep(1.5)
 
 def get_url(url, **kw):
     qurl = 'http://dtws-android2.cbg.163.com/cbg-center/'
     succ = -1
     while succ != 1:
         if succ != -1:
-            captcha.auth()
+            auth()
         data = requests.get(qurl + url, **kw).json()
         succ = data['status']
 
@@ -165,7 +173,7 @@ def work(src='data.txt'):
             f.write('{}')
         data = {}
     else:
-        with open(src, 'r') as f:
+        with open(src, 'r', encoding='gb2312') as f:
             data = json.load(f)
 
     for y, x in data.items():
@@ -200,7 +208,7 @@ def work(src='data.txt'):
     print('Network success')
 
     with open(src, 'w') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=4, ensure_ascii=True)
 
     with open('dataTable.json', 'w') as f:
         json.dump(gen_dataTable(data), f)

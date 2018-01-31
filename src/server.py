@@ -1,29 +1,34 @@
-from flask import Flask, send_from_directory
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+from flask import Flask, send_from_directory, request
 import os
 import json
 import crawler
 import threading
 import time
 import comm
+import requests
 
 app = Flask(__name__, static_url_path='')
 th = threading.Thread()
+cookies = 0
 
-def myfunc():
-    time.sleep(1);
+def do_crawler():
+    time.sleep(1)
     print('wake up')
     crawler.work()
-    time.sleep(10);
+    time.sleep(10)
 
 @app.route('/')
 def index():
-    with open('web\\index.html', 'r', encoding='utf-8') as f:
+    with open(os.path.join('web','index.html'), 'r', encoding='utf-8') as f:
         html = f.read()
 
     return html
 
 @app.route('/dataTable.json')
-def rawdata():
+def raw_data():
     with open('dataTable.json') as f:
         return f.read()
 
@@ -39,15 +44,40 @@ def crawler_refresh():
         comm.nowpage = 0
 
     if not th.isAlive():
-        th = threading.Thread(target=myfunc)
+        th = threading.Thread(target=do_crawler)
         th.start()
+
+    if comm.needcaptcha:
+        response['status'] = 2
     
     return json.dumps(response)
 
+@app.route('/captcha.jpg')
+def raw_captcha_img():
+    global cookies
+
+    res = requests.get('http://dtws-android2.cbg.163.com/cbg-center//captcha_auth.py', params={'act':'query_captcha'})
+    cookies = res.cookies
+    return res.content
+
+@app.route('/check_captcha')
+def check_captcha():
+    global cookies
+
+    captcha = request.args.get('ans')
+    res = requests.get('http://dtws-android2.cbg.163.com/cbg-center//query.py', 
+            params={'act':'check_query_captcha', 'captcha':captcha},
+            cookies=cookies)
+    comm.needcaptcha = (res.json()['status'] == 1)
+
+    return res.json()['msg']
+
+'''
 @app.route('/<string:folder>/<path:path>')
 def send_file(folder, path):
     print('PATH=', path)
     return send_from_directory('f:\\dtws-crawler\\web\\' + folder, path)
+'''
 
 if __name__ == '__main__':
     comm.init()
