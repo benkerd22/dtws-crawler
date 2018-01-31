@@ -187,11 +187,11 @@ def work(src='data.txt'):
     'Crawler main route'
 
     if not os.path.exists(src):
-        with open(src, 'w') as f:
+        with open(src, 'w', encoding='utf-8') as f:
             f.write('{}')
         data = {}
     else:
-        with open(src, 'r', encoding='gb2312') as f:
+        with open(src, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
     for y, x in data.items():
@@ -225,10 +225,10 @@ def work(src='data.txt'):
 
     print('Network success')
 
-    with open(src, 'w') as f:
-        json.dump(data, f, indent=4, ensure_ascii=True)
+    with open(src, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
-    with open('dataTable.json', 'w') as f:
+    with open('dataTable.json', 'w', encoding='utf-8') as f:
         json.dump(gen_datatable(data), f)
 
     print('Refresh success')
